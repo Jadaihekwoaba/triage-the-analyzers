@@ -7,4 +7,11 @@
 
      Unlike the baseline, this file may grow, but every entry is a reviewed decision. -->
 <FindBugsFilter>
+  <!-- D1: EI_EXPOSE_REP and EI_EXPOSE_REP2 off project-wide. Of the 219 findings baselined on
+       2026-11-01: 144 are in JPA entities, whose associations must stay the live references
+       Hibernate tracks (a defensive copy breaks dirty checking and lazy loading); 29 are Spring
+       beans storing injected singletons through constructor injection; 34 are DTO records that are
+       serialized to JSON and dropped; the other 12 are report/principal holders built and read once
+       per request. None stores caller data across a trust boundary. -->
+  <Match><Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/></Match>
 </FindBugsFilter>
