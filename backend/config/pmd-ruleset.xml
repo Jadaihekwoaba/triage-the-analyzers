@@ -13,5 +13,15 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
     <description>PMD quickstart, with Project Pulse's decisions.</description>
     <rule ref="rulesets/java/quickstart.xml">
+        <!-- D2: off. 26 of the 30 flagged classes are JPA @Entity classes, which must keep a no-arg
+             constructor (Jakarta Persistence spec, section 2.1); the other 4 (Result, RatingAverage,
+             PeerEvaluationAverage, WeeklyPeerEvaluationReport) are instantiated reflectively by
+             Jackson/JPA. These constructors are framework requirements, not dead code. -->
+        <exclude name="UncommentedEmptyConstructor"/>
+        <exclude name="UnnecessaryConstructor"/>
+        <!-- D4: off. All 4 findings (AuthController, ReminderService, WeeklyReminderScheduler,
+             DocumentTemplateRegistry) already use SLF4J {} placeholders with plain getter arguments,
+             so SLF4J skips formatting when the level is disabled; an isXxxEnabled() guard adds nothing. -->
+        <exclude name="GuardLogStatement"/>
     </rule>
 </ruleset>
