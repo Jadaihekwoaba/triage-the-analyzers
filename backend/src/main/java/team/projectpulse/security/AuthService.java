@@ -1,5 +1,6 @@
 package team.projectpulse.security;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import team.projectpulse.instructor.Instructor;
 import team.projectpulse.instructor.converter.InstructorToInstructorDtoConverter;
 import team.projectpulse.instructor.dto.InstructorDto;
@@ -29,20 +30,24 @@ public class AuthService {
         this.instructorToInstructorDtoConverter = instructorToInstructorDtoConverter;
     }
 
+    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+            justification = "Only called from AuthController.getLoginInfo after HTTP Basic authentication succeeded, "
+                    + "so getPrincipal() is the MyUserPrincipal returned by UserService.loadUserByUsername.")
     public Map<String, Object> createLoginInfo(Authentication authentication) {
         // Create user info.
         MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
         PeerEvaluationUser peerEvaluationUser = principal.getPeerEvaluationUser();
+        String roles = peerEvaluationUser.getRoles(); // May be null: an admin can save a user with no roles.
 
         Map<String, Object> loginResultMap = new HashMap<>();
 
-        if (peerEvaluationUser.getRoles().equals("student")) {
+        if ("student".equals(roles)) {
             StudentDto studentDto = this.studentToStudentDtoConverter.convert((Student) peerEvaluationUser);
             // Create a JWT.
             String token = this.jwtProvider.createToken(authentication);
             loginResultMap.put("userInfo", studentDto);
             loginResultMap.put("token", token);
-        } else if (peerEvaluationUser.getRoles().contains("instructor")) {
+        } else if (roles != null && roles.contains("instructor")) {
             InstructorDto instructorDto = this.instructorToInstructorDtoConverter.convert((Instructor) peerEvaluationUser);
             // Create a JWT.
             String token = this.jwtProvider.createToken(authentication);
